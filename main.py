@@ -3,7 +3,7 @@ import json
 from Node import *
 import copy
 import ipaddress
-
+from datetime import datetime
 
 def dumper(obj):
     try:
@@ -50,7 +50,7 @@ def create_graph(nodes, layout_name, coordinates=[]):
                     input_node.y = node_with_coordinates['y']
 
 
-def process(layout_name, is_approved=None):
+def process(layout_name, is_approved=None, date_from=None, date_to=None):
     """ Main function for import in other modules
     data arg will have format
      [
@@ -66,6 +66,9 @@ def process(layout_name, is_approved=None):
     all variants are 'sfdp', 'circo', 'dot' """
     # This should be replaced by data arg
 
+    date_from = datetime.strptime(date_from, '%m/%d/%y %H:%M:%S')
+    date_to = datetime.strptime(date_to, '%m/%d/%y %H:%M:%S')
+
     with open('edges.json', 'r', encoding='utf-8') as f:
         data = json.load(f)
         edges_data = data['data']
@@ -80,10 +83,14 @@ def process(layout_name, is_approved=None):
     # get all_nodes for general graph
     all_nodes = []
     for current_device in devices_data:
+        current_created_at = datetime.strptime(current_device['created_at'], '%m/%d/%y %H:%M:%S')
+        if current_created_at < date_from or current_created_at > date_to:
+            continue
         node = Node({
             'id': current_device['id'],
             'name': current_device['name'],
             'type': current_device['type'],
+            'created_at': current_device['created_at'],
             'neighbors': [],
             'networks': current_device['networks']
         })
@@ -105,6 +112,7 @@ def process(layout_name, is_approved=None):
                 'id': init_node.id,
                 'name': init_node.name,
                 'type': init_node.type,
+                'created_at': init_node.created_at,
                 'neighbors': [],
                 'interfaces': init_node.networks
             }))
@@ -150,6 +158,12 @@ def process(layout_name, is_approved=None):
                 router_copy = copy.deepcopy(node)
                 if index_of_network_in_array != -1:
                     result_nodes_2[index_of_network_in_array].children.append(router_copy)
+
+    for node in result_nodes_2:
+        if node.type == 'network':
+            created_at = node.children[0].created_at
+            node.created_at = created_at
+            # TODO: select between all children
 
     result_nodes = []
 

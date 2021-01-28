@@ -13,7 +13,9 @@ class FlatGraph(Resource):
     def get(self):
         args = request.args
         is_approved = args['filter']
-        process('sfdp', is_approved)
+        date_from = args['date_from']
+        date_to = args['date_to']
+        process('sfdp', is_approved, date_from, date_to)
         with open('sfdpgraph.json', 'r', encoding='utf-8') as f:
             data = json.load(f)
             return data
@@ -48,7 +50,9 @@ class MultilevelGraph(Resource):
     def get(self):
         args = request.args
         is_approved = args['filter']
-        process('sfdp', is_approved)
+        date_from = args['date_from']
+        date_to = args['date_to']
+        process('sfdp', is_approved, date_from, date_to)
         with open('graph_by_levels.json', 'r', encoding='utf-8') as f:
             data = json.load(f)
             return data

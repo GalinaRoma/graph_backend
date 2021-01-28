@@ -6,7 +6,7 @@
       "id": "h1",
       "type": "host",
       "name": "Host 1",
-      "created_at": "2021-01-26T18:49:17.006Z",
+      "created_at": "11/10/20 13:55:26",
       "networks": [
         {
           "ip": "10.10.1.11",
@@ -18,7 +18,7 @@
       "id": "h2",
       "type": "host",
       "name": "Host 2",
-      "created_at": "2021-01-26T18:49:17.006Z",
+      "created_at": "11/10/20 13:55:26",
       "networks": [
         {
           "ip": "10.10.1.12",
@@ -30,7 +30,7 @@
       "id": "h3",
       "type": "host",
       "name": "Host 3",
-      "created_at": "2021-01-26T18:49:17.006Z",
+      "created_at": "11/10/20 13:55:26",
       "networks": [
         {
           "ip": "10.10.1.13",
@@ -42,7 +42,7 @@
       "id": "h4",
       "type": "host",
       "name": "Host 4",
-      "created_at": "2021-01-26T18:49:17.006Z",
+      "created_at": "11/10/20 13:55:26",
       "networks": [
         {
           "ip": "10.10.1.138",
@@ -54,7 +54,7 @@
       "id": "h5",
       "type": "host",
       "name": "Host 5",
-      "created_at": "2021-01-26T18:49:17.006Z",
+      "created_at": "11/10/20 13:55:26",
       "networks": [
         {
           "ip": "10.10.2.15",
@@ -66,7 +66,7 @@
       "id": "h6",
       "type": "host",
       "name": "Host 6",
-      "created_at": "2021-01-26T18:49:17.006Z",
+      "created_at": "11/10/20 13:55:26",
       "networks": [
         {
           "ip": "10.10.2.16",
@@ -78,7 +78,7 @@
       "id": "h7",
       "type": "host",
       "name": "Host 7",
-      "created_at": "2021-01-26T18:49:17.006Z",
+      "created_at": "11/10/20 13:55:26",
       "networks": [
         {
           "ip": "10.10.2.17",
@@ -90,7 +90,7 @@
       "id": "h8",
       "type": "host",
       "name": "Host 8",
-      "created_at": "2021-01-26T18:49:17.006Z",
+      "created_at": "11/10/20 13:55:26",
       "networks": [
         {
           "ip": "10.10.4.1",
@@ -102,7 +102,7 @@
       "id": "s1",
       "type": "switch",
       "name": "Switch 1",
-      "created_at": "2021-01-26T18:49:17.006Z",
+      "created_at": "11/10/20 13:55:26",
       "networks": [
         {
           "ip": "10.10.1.21",
@@ -114,7 +114,7 @@
       "id": "s2",
       "type": "switch",
       "name": "Switch 2",
-      "created_at": "2021-01-26T18:49:17.006Z",
+      "created_at": "11/10/20 13:55:26",
       "networks": [
         {
           "ip": "10.10.2.22",
@@ -126,7 +126,7 @@
       "id": "s3",
       "type": "switch",
       "name": "Switch 3",
-      "created_at": "2021-01-26T18:49:17.006Z",
+      "created_at": "11/10/20 13:55:26",
       "networks": [
         {
           "ip": "10.10.2.23",
@@ -138,7 +138,7 @@
       "id": "r1",
       "type": "router",
       "name": "Router 1",
-      "created_at": "2021-01-26T18:49:17.006Z",
+      "created_at": "11/10/20 13:55:26",
       "networks": [
         {
           "ip": "10.10.1.1",
@@ -162,7 +162,7 @@
       "id": "r2",
       "type": "router",
       "name": "Router 2",
-      "created_at": "2021-01-26T18:49:17.006Z",
+      "created_at": "11/10/20 13:55:26",
       "networks": [
         {
           "ip": "10.10.1.2",
@@ -182,7 +182,7 @@
       "id": "r3",
       "type": "router",
       "name": "Router 3",
-      "created_at": "2021-01-26T18:49:17.006Z",
+      "created_at": "11/10/20 13:55:26",
       "networks": [
         {
           "ip": "10.10.2.3",
