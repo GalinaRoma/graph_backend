@@ -82,6 +82,9 @@ def process(layout_name, is_approved=None, date_from=None):
     with open('sfdp_coordinates.json', 'r', encoding='utf-8') as f:
         sfdp_coordinates = json.load(f)
 
+    with open('circo_coordinates.json', 'r', encoding='utf-8') as f:
+        circo_coordinates = json.load(f)
+
     # get all_nodes for general graph
     all_nodes = []
     for current_device in devices_data:
@@ -218,7 +221,10 @@ def process(layout_name, is_approved=None, date_from=None):
                             [elem] = found_elems
                             current_node.neighbors.append(elem.id)
 
-    create_graph(all_nodes, layout_name, sfdp_coordinates)
+    if layout_name == 'sfdp':
+        create_graph(all_nodes, layout_name, sfdp_coordinates)
+    if layout_name == 'circo':
+        create_graph(all_nodes, layout_name, circo_coordinates)
     if layout_name == 'sfdp':
         create_graph(result_nodes, layout_name)
         for node in result_nodes:

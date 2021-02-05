@@ -41,10 +41,18 @@ class FlatGraph(Resource):
 
 class CircoGraph(Resource):
     def get(self):
-        process('circo')
+        args = request.args
+        is_approved = args['filter']
+        date_from = args['date_from']
+
+        process('circo', is_approved, date_from)
         with open('circograph.json', 'r', encoding='utf-8') as f:
             data = json.load(f)
             return data
+
+    def post(self):
+        with open('circo_coordinates.json', 'w', encoding='utf-8') as f:
+            json.dump(request.get_json(), f)
 
 
 class MultilevelGraph(Resource):
