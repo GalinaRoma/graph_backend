@@ -1,6 +1,7 @@
 import networkx as nx
 import json
 from Node import *
+from NeighborConnection import *
 import copy
 import ipaddress
 from dateutil import parser
@@ -23,7 +24,7 @@ def create_graph(nodes, layout_name, coordinates=[]):
     for node in nodes:
         g.add_node(node)
         for neighbor in node.neighbors:
-            found_elems = [i for i in nodes if i.id == neighbor]
+            found_elems = [i for i in nodes if i.id == neighbor.neighbor_id]
             if len(found_elems) > 0:
                 [neighbor_node] = found_elems
                 g.add_edge(node, neighbor_node)
@@ -85,6 +86,9 @@ def process(layout_name, is_approved=None, date_from=None):
     with open('circo_coordinates.json', 'r', encoding='utf-8') as f:
         circo_coordinates = json.load(f)
 
+    with open('multilevel_coordinates.json', 'r', encoding='utf-8') as f:
+        multilevel_coordinates = json.load(f)
+
     # get all_nodes for general graph
     all_nodes = []
     for current_device in devices_data:
@@ -101,11 +105,19 @@ def process(layout_name, is_approved=None, date_from=None):
         })
         for edge in edges_data:
             if current_device['id'] == edge['first_interfaces_group_id']:
-                if is_approved == 'null' or edge['is_approved'] == str(is_approved):
-                    node.neighbors.append(edge['second_interfaces_group_id'])
+                if is_approved is None or edge['is_approved'] == is_approved:
+                    node.neighbors.append(NeighborConnection({
+                        'neighbor_id': edge['second_interfaces_group_id'],
+                        'approved': edge['is_approved'],
+                        'protocols': edge['protocols']
+                    }))
             if current_device['id'] == edge['second_interfaces_group_id']:
-                if is_approved == 'null' or edge['is_approved'] == str(is_approved):
-                    node.neighbors.append(edge['first_interfaces_group_id'])
+                if is_approved is None or edge['is_approved'] == is_approved:
+                    node.neighbors.append(NeighborConnection({
+                        'neighbor_id': edge['first_interfaces_group_id'],
+                        'approved': edge['is_approved'],
+                        'protocols': edge['protocols']
+                    }))
         all_nodes.append(node)
 
     if layout_name == 'sfdp':
@@ -191,18 +203,22 @@ def process(layout_name, is_approved=None, date_from=None):
             if current_node.type == 'network':
                 for network_child in current_node.children:
                     # process for get neighbors for network-routers level
-                    for child_neighbor_id in network_child.neighbors:
-                        found_elems = [i for i in result_nodes if i.id == child_neighbor_id]
+                    for child_neighbor in network_child.neighbors:
+                        found_elems = [i for i in result_nodes if i.id == child_neighbor.neighbor_id]
                         if len(found_elems) > 0:
                             [child_neighbor_node] = found_elems
                             if child_neighbor_node.type == 'router':
                                 # set id of neighbor to network
-                                current_node.neighbors.append(child_neighbor_id)
+                                current_node.neighbors.append(child_neighbor)
                                 # set id of neighbor to router
-                                child_neighbor_node.neighbors.append(current_node.id)
+                                child_neighbor_node.neighbors.append(NeighborConnection({
+                                    'neighbor_id': current_node.id,
+                                    'approved': child_neighbor.approved,
+                                    'protocols': child_neighbor.protocols,
+                                }))
 
-                    def is_neighbor_valid(neighbor_id) -> bool:
-                        child_neighbor_node = [i for i in all_nodes if i.id == neighbor_id][0]
+                    def is_neighbor_valid(neighbor) -> bool:
+                        child_neighbor_node = [i for i in all_nodes if i.id == neighbor.neighbor_id][0]
                         if child_neighbor_node.type != 'router':
                             neighbor_network = get_network_ip(child_neighbor_node.networks[0])
                             return neighbor_network == current_node.id
@@ -215,21 +231,25 @@ def process(layout_name, is_approved=None, date_from=None):
                 found_elems = [i for i in all_nodes if i.id == current_node.id]
                 if len(found_elems) > 0:
                     [current_router] = found_elems
-                    for router_neighbor_id in current_router.neighbors:
-                        found_elems = [i for i in result_nodes if i.id == router_neighbor_id]
+                    for router_neighbor in current_router.neighbors:
+                        found_elems = [i for i in result_nodes if i.id == router_neighbor.neighbor_id]
                         if len(found_elems) > 0:
                             [elem] = found_elems
-                            current_node.neighbors.append(elem.id)
+                            current_node.neighbors.append(NeighborConnection({
+                                    'neighbor_id': elem.id,
+                                    'approved': router_neighbor.approved,
+                                    'protocols': router_neighbor.protocols,
+                                }))
 
     if layout_name == 'sfdp':
         create_graph(all_nodes, layout_name, sfdp_coordinates)
     if layout_name == 'circo':
         create_graph(all_nodes, layout_name, circo_coordinates)
     if layout_name == 'sfdp':
-        create_graph(result_nodes, layout_name)
+        create_graph(result_nodes, layout_name, multilevel_coordinates)
         for node in result_nodes:
             if node.type == 'network':
-                create_graph(node.children, layout_name)
+                create_graph(node.children, layout_name, multilevel_coordinates)
         output_filename = 'graph_by_levels.json'
         with open(output_filename, 'w') as outfile:
             json.dump(result_nodes, outfile, default=dumper)

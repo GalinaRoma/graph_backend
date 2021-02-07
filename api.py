@@ -12,7 +12,12 @@ api = Api(app)
 class FlatGraph(Resource):
     def get(self):
         args = request.args
-        is_approved = args['filter']
+        if args['filter'] == 'null':
+            is_approved = None
+        elif args['filter'] == 'true':
+            is_approved = True
+        else:
+            is_approved = False
         date_from = args['date_from']
 
         process('sfdp', is_approved, date_from)
@@ -42,7 +47,12 @@ class FlatGraph(Resource):
 class CircoGraph(Resource):
     def get(self):
         args = request.args
-        is_approved = args['filter']
+        if args['filter'] == 'null':
+            is_approved = None
+        elif args['filter'] == 'true':
+            is_approved = True
+        else:
+            is_approved = False
         date_from = args['date_from']
 
         process('circo', is_approved, date_from)
@@ -58,7 +68,12 @@ class CircoGraph(Resource):
 class MultilevelGraph(Resource):
     def get(self):
         args = request.args
-        is_approved = args['filter']
+        if args['filter'] == 'null':
+            is_approved = None
+        elif args['filter'] == 'true':
+            is_approved = True
+        else:
+            is_approved = False
         date_from = args['date_from']
         process('sfdp', is_approved, date_from)
         with open('graph_by_levels.json', 'r', encoding='utf-8') as f:
