@@ -18,9 +18,9 @@ class FlatGraph(Resource):
             is_approved = True
         else:
             is_approved = False
-        date_from = args['date_from']
+        filter_date = args['date_from']
 
-        process('sfdp', is_approved, date_from)
+        process('sfdp', is_approved, filter_date)
         with open('sfdpgraph.json', 'r', encoding='utf-8') as f:
             data = json.load(f)
             return data
@@ -53,9 +53,9 @@ class CircoGraph(Resource):
             is_approved = True
         else:
             is_approved = False
-        date_from = args['date_from']
+        filter_date = args['date_from']
 
-        process('circo', is_approved, date_from)
+        process('circo', is_approved, filter_date)
         with open('circograph.json', 'r', encoding='utf-8') as f:
             data = json.load(f)
             return data
@@ -74,8 +74,8 @@ class MultilevelGraph(Resource):
             is_approved = True
         else:
             is_approved = False
-        date_from = args['date_from']
-        process('sfdp', is_approved, date_from)
+        filter_date = args['date_from']
+        process('sfdp', is_approved, filter_date)
         with open('graph_by_levels.json', 'r', encoding='utf-8') as f:
             data = json.load(f)
             return data
