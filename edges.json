@@ -1,1 +1,141 @@
-{"status": 200, "message": "Ok", "data": [{"id": "h1-s1", "first_interfaces_group_id": "h1", "second_interfaces_group_id": "s1", "is_approved": true, "protocols": ["tcp"]}, {"id": "h2-s1", "first_interfaces_group_id": "h2", "second_interfaces_group_id": "s1", "is_approved": true, "protocols": ["tcp"]}, {"id": "r2-r1", "first_interfaces_group_id": "r2", "second_interfaces_group_id": "r1", "is_approved": true, "protocols": ["tcp"]}, {"id": "plc1-s1", "first_interfaces_group_id": "plc1", "second_interfaces_group_id": "s1", "is_approved": true, "protocols": ["tcp"]}, {"id": "s1-r1", "first_interfaces_group_id": "s1", "second_interfaces_group_id": "r1", "is_approved": true, "protocols": ["tcp"]}, {"id": "s1-r2", "first_interfaces_group_id": "s1", "second_interfaces_group_id": "r2", "is_approved": true, "protocols": ["tcp"]}, {"id": "r1-h4", "first_interfaces_group_id": "r1", "second_interfaces_group_id": "h4", "is_approved": true, "protocols": ["tcp"]}, {"id": "r1-s2", "first_interfaces_group_id": "r1", "second_interfaces_group_id": "s2", "is_approved": true, "protocols": ["tcp"]}, {"id": "s2-h5", "first_interfaces_group_id": "s2", "second_interfaces_group_id": "h5", "is_approved": true, "protocols": ["tcp"]}, {"id": "r2-s3", "first_interfaces_group_id": "r2", "second_interfaces_group_id": "s3", "is_approved": true, "protocols": ["tcp"]}, {"id": "s3-s2", "first_interfaces_group_id": "s3", "second_interfaces_group_id": "s2", "is_approved": true, "protocols": ["tcp"]}, {"id": "s3-plc2", "first_interfaces_group_id": "s3", "second_interfaces_group_id": "plc2", "is_approved": true, "protocols": ["tcp"]}, {"id": "s3-h7", "first_interfaces_group_id": "s3", "second_interfaces_group_id": "h7", "is_approved": true, "protocols": ["tcp"]}, {"id": "s3-r3", "first_interfaces_group_id": "s3", "second_interfaces_group_id": "r3", "is_approved": true, "protocols": ["tcp"]}, {"id": "r3-h8", "first_interfaces_group_id": "r3", "second_interfaces_group_id": "h8", "is_approved": true, "protocols": ["tcp"]}, {"id": "hacker1-h8", "first_interfaces_group_id": "hacker1", "second_interfaces_group_id": "h8", "is_approved": false, "protocols": ["ping", "telnet", "ssh", "s7comm"]}]}
+{
+  "status": 200,
+  "message": "Ok",
+  "data": [
+    {
+      "id": "h1-s1",
+      "first_interfaces_group_id": "h1",
+      "second_interfaces_group_id": "s1",
+      "is_approved": true,
+      "protocols": [
+        "tcp"
+      ]
+    },
+    {
+      "id": "h2-s1",
+      "first_interfaces_group_id": "h2",
+      "second_interfaces_group_id": "s1",
+      "is_approved": true,
+      "protocols": [
+        "tcp"
+      ]
+    },
+    {
+      "id": "r2-r1",
+      "first_interfaces_group_id": "r2",
+      "second_interfaces_group_id": "r1",
+      "is_approved": true,
+      "protocols": [
+        "tcp"
+      ]
+    },
+    {
+      "id": "plc1-s1",
+      "first_interfaces_group_id": "plc1",
+      "second_interfaces_group_id": "s1",
+      "is_approved": true,
+      "protocols": [
+        "tcp"
+      ]
+    },
+    {
+      "id": "s1-r1",
+      "first_interfaces_group_id": "s1",
+      "second_interfaces_group_id": "r1",
+      "is_approved": true,
+      "protocols": [
+        "tcp"
+      ]
+    },
+    {
+      "id": "s1-r2",
+      "first_interfaces_group_id": "s1",
+      "second_interfaces_group_id": "r2",
+      "is_approved": true,
+      "protocols": [
+        "tcp"
+      ]
+    },
+    {
+      "id": "r1-h4",
+      "first_interfaces_group_id": "r1",
+      "second_interfaces_group_id": "h4",
+      "is_approved": true,
+      "protocols": [
+        "tcp"
+      ]
+    },
+    {
+      "id": "r1-s2",
+      "first_interfaces_group_id": "r1",
+      "second_interfaces_group_id": "s2",
+      "is_approved": true,
+      "protocols": [
+        "tcp"
+      ]
+    },
+    {
+      "id": "s2-h5",
+      "first_interfaces_group_id": "s2",
+      "second_interfaces_group_id": "h5",
+      "is_approved": true,
+      "protocols": [
+        "tcp"
+      ]
+    },
+    {
+      "id": "r2-s3",
+      "first_interfaces_group_id": "r2",
+      "second_interfaces_group_id": "s3",
+      "is_approved": true,
+      "protocols": [
+        "tcp"
+      ]
+    },
+    {
+      "id": "s3-s2",
+      "first_interfaces_group_id": "s3",
+      "second_interfaces_group_id": "s2",
+      "is_approved": true,
+      "protocols": [
+        "tcp"
+      ]
+    },
+    {
+      "id": "s3-plc2",
+      "first_interfaces_group_id": "s3",
+      "second_interfaces_group_id": "plc2",
+      "is_approved": true,
+      "protocols": [
+        "tcp"
+      ]
+    },
+    {
+      "id": "s3-h7",
+      "first_interfaces_group_id": "s3",
+      "second_interfaces_group_id": "h7",
+      "is_approved": true,
+      "protocols": [
+        "tcp"
+      ]
+    },
+    {
+      "id": "s3-r3",
+      "first_interfaces_group_id": "s3",
+      "second_interfaces_group_id": "r3",
+      "is_approved": true,
+      "protocols": [
+        "tcp"
+      ]
+    },
+    {
+      "id": "r3-h8",
+      "first_interfaces_group_id": "r3",
+      "second_interfaces_group_id": "h8",
+      "is_approved": true,
+      "protocols": [
+        "tcp"
+      ]
+    }
+  ]
+}

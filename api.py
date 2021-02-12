@@ -3,22 +3,37 @@ from flask_cors import CORS
 from flask_restful import Resource, Api
 import json
 from main import process
+from dateutil import parser
 
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
 
 
+def parse_approved_filter():
+    args = request.args
+    if args['is_approved'] == 'false':
+        is_approved = False
+    elif args['is_approved'] == 'true':
+        is_approved = True
+    else:
+        is_approved = None
+    return is_approved
+
+
+def parse_filter_date():
+    args = request.args
+    if args['filter_date'] == 'null':
+        filter_date = None
+    else:
+        filter_date = parser.isoparse(args['filter_date'])
+    return filter_date
+
+
 class FlatGraph(Resource):
     def get(self):
-        args = request.args
-        if args['filter'] == 'null':
-            is_approved = None
-        elif args['filter'] == 'true':
-            is_approved = True
-        else:
-            is_approved = False
-        filter_date = args['date_from']
+        is_approved = parse_approved_filter()
+        filter_date = parse_filter_date()
 
         process('sfdp', is_approved, filter_date)
         with open('sfdpgraph.json', 'r', encoding='utf-8') as f:
@@ -46,14 +61,8 @@ class FlatGraph(Resource):
 
 class CircoGraph(Resource):
     def get(self):
-        args = request.args
-        if args['filter'] == 'null':
-            is_approved = None
-        elif args['filter'] == 'true':
-            is_approved = True
-        else:
-            is_approved = False
-        filter_date = args['date_from']
+        is_approved = parse_approved_filter()
+        filter_date = parse_filter_date()
 
         process('circo', is_approved, filter_date)
         with open('circograph.json', 'r', encoding='utf-8') as f:
@@ -67,15 +76,10 @@ class CircoGraph(Resource):
 
 class MultilevelGraph(Resource):
     def get(self):
-        args = request.args
-        if args['filter'] == 'null':
-            is_approved = None
-        elif args['filter'] == 'true':
-            is_approved = True
-        else:
-            is_approved = False
-        filter_date = args['date_from']
-        process('sfdp', is_approved, filter_date)
+        is_approved = parse_approved_filter()
+        filter_date = parse_filter_date()
+
+        process('sfdp', is_approved, filter_date, is_multilevel=True)
         with open('graph_by_levels.json', 'r', encoding='utf-8') as f:
             data = json.load(f)
             return data
