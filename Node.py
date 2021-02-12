@@ -12,7 +12,6 @@ class Node:
         self.neighbors = device['neighbors'] if 'neighbors' in device.keys() else None
         self.children = device['children'] if 'children' in device.keys() else None
         self.interfaces = device['interfaces'] if 'interfaces' in device.keys() else None
-        self.networks = device['networks'] if 'networks' in device.keys() else None
         self.x = x
         self.y = y
 

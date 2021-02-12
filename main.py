@@ -23,7 +23,7 @@ def get_network_ip(network):
 
 def is_device_in_current_network(device, network_address) -> bool:
     """ Check interfaces of device is belong to network"""
-    for interface in device.networks:
+    for interface in device.interfaces:
         interface_network = get_network_ip(interface)
         if interface_network == network_address:
             return True
@@ -45,7 +45,7 @@ def get_children_with_one_interface(children):
     """ Return children which have only one interface """
     children_with_one_interface = []
     for child in children:
-        if len(child.networks) == 1:
+        if len(child.interfaces) == 1:
             children_with_one_interface.append(child)
     return children_with_one_interface
 
@@ -132,7 +132,7 @@ def prepare_data_for_flat_graph(devices_data, edges_data, is_approved, filter_da
             'type': current_device['type'],
             'created_at': current_device['created_at'],
             'neighbors': [],
-            'networks': current_device['networks']
+            'interfaces': current_device['interfaces']
         })
         for edge in edges_data:
             # Save only edges which satisfy is_approved filter
@@ -166,11 +166,11 @@ def prepare_data_for_multilevel_graph(devices_data, edges_data, is_approved, fil
         # If device has more than 1 interfaces
         # Then it should be on the border of several networks
         # That`s why we save it to first level
-        if len(device.networks) > 1:
+        if len(device.interfaces) > 1:
             device_copy = copy.deepcopy(device)
             all_nodes_without_neighbors.append(device_copy)
         # check each interface of device and save it to network
-        for interface in device.networks:
+        for interface in device.interfaces:
             network = get_network_ip(interface)
             network_node = Node({
                 'id': network,
@@ -183,7 +183,7 @@ def prepare_data_for_multilevel_graph(devices_data, edges_data, is_approved, fil
             device_copy = copy.deepcopy(device)
             # Save id of original device and fix id to new device
             # For separate device on 1 and 2 levels
-            if len(device.networks) > 1:
+            if len(device.interfaces) > 1:
                 device_copy.original_id = device_copy.id
                 device_copy.id = device_copy.id + str(network)
             index_of_network_in_array = find_index(all_nodes_without_neighbors, lambda i: i.id == network)
@@ -225,7 +225,7 @@ def prepare_data_for_multilevel_graph(devices_data, edges_data, is_approved, fil
                 child_new_neighbors = []
                 # Case when adding neighbor for network
                 # Network neighbors are its children with several interfaces
-                if len(network_child.networks) > 1:
+                if len(network_child.interfaces) > 1:
                     for neighbor_connection in network_child.neighbors:
                         neighbor_node = find(all_devices,
                                                    lambda i: i.id == neighbor_connection.neighbor_id)
@@ -253,7 +253,7 @@ def prepare_data_for_multilevel_graph(devices_data, edges_data, is_approved, fil
                         child_neighbor_node = find(all_devices, lambda i: i.id == child_neighbor_connection.neighbor_id)
                         neighbor_in_current_network = is_device_in_current_network(child_neighbor_node, current_node.id)
                         if neighbor_in_current_network:
-                            if len(child_neighbor_node.networks) > 1:
+                            if len(child_neighbor_node.interfaces) > 1:
                                 add_neighbor(NeighborConnection({
                                     'neighbor_id': child_neighbor_connection.neighbor_id + str(current_node.id),
                                     'approved': child_neighbor_connection.approved,
