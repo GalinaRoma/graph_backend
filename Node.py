@@ -7,6 +7,7 @@ class Node:
         self.id = device['id']
         self.name = device['name']
         self.type = device['type']
+        self.original_id = device['original_id'] if 'original_id' in device.keys() else None
         self.created_at = device['created_at'] if 'created_at' in device.keys() else None
         self.neighbors = device['neighbors'] if 'neighbors' in device.keys() else None
         self.children = device['children'] if 'children' in device.keys() else None

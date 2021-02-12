@@ -6,6 +6,7 @@ import copy
 import ipaddress
 from dateutil import parser
 
+
 def dumper(obj):
     try:
         return obj.toJSON()
@@ -19,13 +20,11 @@ def get_network_ip(network):
     return str(a.network)
 
 
-def is_neighbor_valid(neighbor, all_nodes, current_node) -> bool:
-    child_neighbor_node = [i for i in all_nodes if i.id == neighbor.neighbor_id][0]
-    if child_neighbor_node.type != 'router':
-        neighbor_network = get_network_ip(child_neighbor_node.networks[0])
-        return neighbor_network == current_node.id
-    elif child_neighbor_node.type == 'router':
-        return True
+def is_neighbor_in_current_network(neighbor, network) -> bool:
+    for interface in neighbor.networks:
+        interface_network = get_network_ip(interface)
+        if interface_network == network:
+            return True
     return False
 
 
@@ -79,21 +78,6 @@ def create_graph(nodes, layout_name, coordinates=[]):
 
 
 def process(layout_name, is_approved=None, filter_date=None):
-    """ Main function for import in other modules
-    data arg will have format
-     [
-        {
-           "id": "03507423-53e1-4ba1-aeb6-41c911aa88f8",
-           "first_interfaces_group_id": "ae17be0e-501c-4bdf-8382-120f6844a546",
-           "second_interfaces_group_id": "bac2c676-c41e-4148-83ef-bc64f26b72a0",
-           "status": false,
-           "data_flows_count": 1
-        }, ...
-     ]
-    layout_name arg as default has 'sfdp' value
-    all variants are 'sfdp', 'circo', 'dot' """
-    # This should be replaced by data arg
-
     if filter_date == 'null' or filter_date is None:
         filter_date = None
     else:
@@ -148,98 +132,7 @@ def process(layout_name, is_approved=None, filter_date=None):
         all_nodes.append(node)
 
     if layout_name == 'sfdp':
-        # get nodes separated to 2 levels
-        nodes_without_neighbors = []
-
-        for init_node in all_nodes:
-            if init_node.type == 'router':
-                nodes_without_neighbors.append(Node({
-                    'id': init_node.id,
-                    'name': init_node.name,
-                    'type': init_node.type,
-                    'created_at': init_node.created_at,
-                    'neighbors': [],
-                    'interfaces': init_node.networks
-                }))
-            else:
-                network = get_network_ip(init_node.networks[0])
-                network_node = Node({
-                    'id': network,
-                    'name': network,
-                    'type': 'network',
-                    'neighbors': [],
-                    'children': []
-                })
-                init_node_copy = copy.deepcopy(init_node)
-                index_of_network_in_array = find_index(nodes_without_neighbors, lambda i: i.id == network)
-                if index_of_network_in_array != -1:
-                    nodes_without_neighbors[index_of_network_in_array].children.append(init_node_copy)
-                else:
-                    network_node.children.append(init_node_copy)
-                    nodes_without_neighbors.append(network_node)
-
-        # After we have two level of network, we should add routers to second level by interface
-        for node in nodes_without_neighbors:
-            if node.type == 'router':
-                for interface in node.interfaces:
-                    network = get_network_ip(interface)
-                    router_copy = copy.deepcopy(node)
-                    index_of_network_in_array = find_index(nodes_without_neighbors, lambda i: i.id == network)
-                    if index_of_network_in_array != -1:
-                        nodes_without_neighbors[index_of_network_in_array].children.append(router_copy)
-
-        for node in nodes_without_neighbors:
-            if node.type == 'network':
-                created_at = node.children[0].created_at
-                node.created_at = created_at
-                # TODO: select between all children
-
-        result_nodes = []
-
-        # Create result list of nodes for multilevel graph
-        for node in nodes_without_neighbors:
-            if node.type == 'network':
-                if len(node.children) == 1:
-                    result_nodes.append(node.children[0])
-                elif len(node.children) == 2:
-                    if node.children[0].type == 'router':
-                        result_nodes.append(node.children[1])
-                    elif node.children[1].type == 'router':
-                        result_nodes.append(node.children[0])
-                else:
-                    result_nodes.append(node)
-            else:
-                result_nodes.append(node)
-
-        # Set neighbors for networks, it children and routers.
-        for current_node in result_nodes:
-            if current_node.type == 'network':
-                for network_child in current_node.children:
-                    # process for get neighbors for network-routers level
-                    for child_neighbor in network_child.neighbors:
-                        child_neighbor_node = find(result_nodes, lambda i: i.id == child_neighbor.neighbor_id)
-                        if child_neighbor_node and child_neighbor_node.type == 'router':
-                            # set id of neighbor to network
-                            current_node.neighbors.append(child_neighbor)
-                            # set id of neighbor to router
-                            child_neighbor_node.neighbors.append(NeighborConnection({
-                                'neighbor_id': current_node.id,
-                                'approved': child_neighbor.approved,
-                                'protocols': child_neighbor.protocols,
-                            }))
-                    # Filter only children with current network
-                    network_child.neighbors = list(filter(lambda elem: is_neighbor_valid(elem, all_nodes, current_node), network_child.neighbors))
-            elif current_node.type == 'router':
-                current_router = find(all_nodes, lambda i: i.id == current_node.id)
-                if current_router:
-                    for router_neighbor in current_router.neighbors:
-                        neighbor = find(result_nodes, lambda i: i.id == router_neighbor.neighbor_id)
-                        if neighbor:
-                            current_node.neighbors.append(NeighborConnection({
-                                'neighbor_id': neighbor.id,
-                                'approved': router_neighbor.approved,
-                                'protocols': router_neighbor.protocols,
-                            }))
+        result_nodes = process2(all_nodes)
 
     if layout_name == 'sfdp':
         create_graph(all_nodes, layout_name, sfdp_coordinates)
@@ -249,7 +142,8 @@ def process(layout_name, is_approved=None, filter_date=None):
         create_graph(result_nodes, layout_name, multilevel_coordinates)
         for node in result_nodes:
             if node.type == 'network':
-                create_graph(node.children, layout_name, multilevel_coordinates)
+                network_with_coordinates = find(multilevel_coordinates, lambda i: i["id"] == node.id)
+                create_graph(node.children, layout_name, network_with_coordinates["children"])
         output_filename = 'graph_by_levels.json'
         with open(output_filename, 'w') as outfile:
             json.dump(result_nodes, outfile, default=dumper)
@@ -257,3 +151,135 @@ def process(layout_name, is_approved=None, filter_date=None):
     output_filename = layout_name + 'graph.json'
     with open(output_filename, 'w') as outfile:
         json.dump(all_nodes, outfile, default=dumper)
+
+
+def get_child_with_min_created_date(children):
+    child_with_min_created_at = children[0]
+    for child in children:
+        min_date = parser.isoparse(child_with_min_created_at.created_at)
+        child_date = parser.isoparse(child.created_at)
+        if child_date < min_date:
+            child_with_min_created_at = child
+    return child_with_min_created_at
+
+
+def get_children_with_one_interface(children):
+    children_with_one_interface = []
+    for child in children:
+        if len(child.networks) == 1:
+            children_with_one_interface.append(child)
+    return children_with_one_interface
+
+
+def add_neighbor(neighbor, neighbors):
+    is_exist = find(neighbors, lambda i: i.neighbor_id == neighbor.neighbor_id)
+    if is_exist is None:
+        neighbors.append(neighbor)
+
+
+
+def process2(all_devices):
+    all_nodes_without_neighbors = []
+    for device in all_devices:
+        # if device has more than 1 interfaces
+        # then it should be on the border of several networks
+        # that`s why we save it to first level
+        if len(device.networks) > 1:
+            device_copy = copy.deepcopy(device)
+            all_nodes_without_neighbors.append(device_copy)
+        # check each interface of device and save it to network
+        for interface in device.networks:
+            network = get_network_ip(interface)
+            network_node = Node({
+                'id': network,
+                'name': network,
+                'type': 'network',
+                'neighbors': [],
+                'children': []
+            })
+            # create copy of device to create child object and not change input device
+            device_copy = copy.deepcopy(device)
+            # save id of original device and fix id to new device
+            # for separate device on 1 and 2 levels
+            if len(device.networks) > 1:
+                device_copy.original_id = device_copy.id
+                device_copy.id = device_copy.id + str(network)
+            index_of_network_in_array = find_index(all_nodes_without_neighbors, lambda i: i.id == network)
+            if index_of_network_in_array != -1:
+                all_nodes_without_neighbors[index_of_network_in_array].children.append(device_copy)
+            else:
+                network_node.children.append(device_copy)
+                all_nodes_without_neighbors.append(network_node)
+
+    # set created_at param to network types as min of children created_at
+    for node in all_nodes_without_neighbors:
+        if node.type == 'network':
+            child_with_min_created_date = get_child_with_min_created_date(node.children)
+            node.created_at = child_with_min_created_date.created_at
+
+    result_nodes_without_neighbors = []
+
+    # Create result list of nodes for multilevel graph
+    # Move device from network where only one device to 1 level
+    for node in all_nodes_without_neighbors:
+        if node.type == 'network':
+            children_with_one_interface = get_children_with_one_interface(node.children)
+            # case where no element with all interfaces in network
+            # maybe devices with several interfaces which exist on level 1
+            if len(children_with_one_interface) == 0:
+                continue
+            # case when one element in network, we should move it to level 1
+            elif len(children_with_one_interface) == 1:
+                result_nodes_without_neighbors.append(children_with_one_interface[0])
+            else:
+                result_nodes_without_neighbors.append(node)
+        else:
+            result_nodes_without_neighbors.append(node)
+
+    for current_node in result_nodes_without_neighbors:
+        if current_node.type == 'network':
+            for network_child in current_node.children:
+                child_new_neighbors = []
+                if len(network_child.networks) > 1:
+                    for neighbor_connection in network_child.neighbors:
+                        neighbor_node = find(all_devices,
+                                                   lambda i: i.id == neighbor_connection.neighbor_id)
+                        neighbor_in_current_network = is_neighbor_in_current_network(neighbor_node, current_node.id)
+                        if neighbor_in_current_network:
+                            add_neighbor(NeighborConnection({
+                                            'neighbor_id': network_child.original_id,
+                                            'approved': neighbor_connection.approved,
+                                            'protocols': neighbor_connection.protocols,
+                                        }), current_node.neighbors)
+                            neighbor_node = find(all_devices,
+                                                 lambda i: i.id == network_child.original_id)
+                            add_neighbor(NeighborConnection({
+                                'neighbor_id': current_node.id,
+                                'approved': neighbor_connection.approved,
+                                'protocols': neighbor_connection.protocols,
+                            }), neighbor_node.neighbors)
+                for child_neighbor_connection in network_child.neighbors:
+                    child_neighbor_node = find(result_nodes_without_neighbors,
+                                               lambda i: i.id == child_neighbor_connection.neighbor_id)
+                    if child_neighbor_node is None:
+                        child_neighbor_node = find(all_devices, lambda i: i.id == child_neighbor_connection.neighbor_id)
+                        neighbor_in_current_network = is_neighbor_in_current_network(child_neighbor_node, current_node.id)
+                        if neighbor_in_current_network:
+                            if len(child_neighbor_node.networks) > 1:
+                                add_neighbor(NeighborConnection({
+                                    'neighbor_id': child_neighbor_connection.neighbor_id + str(current_node.id),
+                                    'approved': child_neighbor_connection.approved,
+                                    'protocols': child_neighbor_connection.protocols,
+                                }), child_new_neighbors)
+                            else:
+                                add_neighbor(child_neighbor_connection, child_new_neighbors)
+                network_child.neighbors = child_new_neighbors
+        else:
+            new_neighbors = []
+            for neighbor in current_node.neighbors:
+                neighbor_exist_on_level_one = find(result_nodes_without_neighbors, lambda i: i.id == neighbor.neighbor_id)
+                if neighbor_exist_on_level_one:
+                    add_neighbor(neighbor, new_neighbors)
+            current_node.neighbors = new_neighbors
+
+    return result_nodes_without_neighbors
